@@ -1,80 +1,62 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
-public class Spawner : MonoBehaviour
+public class Spawner : ObjectPool
 {
-    [SerializeField] private List<Wave> _waves;
+    [SerializeField] private GameObject _enemyPrefab;
     [SerializeField] private Transform[] _spawnPoints;
-    [SerializeField] private Player _player;
+    [SerializeField] private float _speed;
+    [SerializeField] private float _delay;
 
-    private Wave _currentWave;
-    private int _currentWaveNumber = 0;
-    private float _timeAfterLastSpawn;
-    private int _spawned;
-
-    public event UnityAction AllEnemySpawned;
+    private bool isWork = true;
 
     private void Start()
     {
-        SetWave(_currentWaveNumber);
+        Initialize(_enemyPrefab);
+        StartCoroutine(SpawnEnemy());
     }
 
-    private void Update()
+    private void SetEnemy(GameObject enemy, Vector3 spawnPoint)
     {
-        if(_currentWave == null)
-            return;
+        enemy.SetActive(true);
+        enemy.transform.position = spawnPoint;
+    }
 
-        _timeAfterLastSpawn += Time.deltaTime;
 
-        if(_timeAfterLastSpawn >= _currentWave.Delay)
+    private Vector3 GetRandomDirection()
+    {
+        int minNumber = 0;
+        int maxNumber = 2;
+        int number = Random.Range(minNumber, maxNumber);
+
+        if (number == minNumber)
         {
-            InstantiateEnemy();
-            _spawned++;
-            _timeAfterLastSpawn = 0;
+            return Vector3.left;
         }
-
-        if(_currentWave.Count <= _spawned)
+        else
         {
-            if (_waves.Count > _currentWaveNumber + 1)
-                AllEnemySpawned?.Invoke();
-
-            _currentWave = null;
+            return Vector3.right;
         }
     }
 
-    private void OnEnemyDying(Enemy enemy)
+    private IEnumerator SpawnEnemy()
     {
-        enemy.Dying -= OnEnemyDying;
+        var waitForSeconds = new WaitForSeconds(_delay);
 
-        _player.AddMoney(enemy.Reward);
+        while(isWork)
+        {
+            if (TryGetObject(out GameObject enemyPrefab))
+            {
+                int spawnPointNumber = Random.Range(0, _spawnPoints.Length);
+
+                SetEnemy(enemyPrefab, _spawnPoints[spawnPointNumber].position);
+
+                EnemyMovement enemyMovement = enemyPrefab.GetComponent<EnemyMovement>();
+                enemyMovement.SetDirection(GetRandomDirection());
+
+                yield return waitForSeconds;
+            }
+        }
     }
-
-    private void InstantiateEnemy()
-    {
-        int spawnPointNumber = Random.Range(0, _spawnPoints.Length);
-        Enemy enemy = Instantiate(_currentWave.Template, _spawnPoints[spawnPointNumber].position, _spawnPoints[spawnPointNumber].rotation, _spawnPoints[spawnPointNumber]).GetComponent<Enemy>();
-        enemy.Init(_player);
-        enemy.Dying += OnEnemyDying;
-    }
-
-    private void SetWave(int index)
-    {
-        _currentWave = _waves[index];
-    }
-
-    public void NextWave()
-    {
-        SetWave(++_currentWaveNumber);
-        _spawned = 0;
-    }
-}
-
-[System.Serializable]
-public class Wave
-{
-    public GameObject Template;
-    public float Delay;
-    public int Count;
 }
