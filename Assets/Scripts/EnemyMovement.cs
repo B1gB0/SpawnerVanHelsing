@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
@@ -25,14 +23,22 @@ public class EnemyMovement : MonoBehaviour
     {
         _direction = direction;
 
-        if (_direction.x >= 0)
-            Flip();
+        Flip();
     }
 
-    private void Flip()
+    public void Flip()
     {
-        Vector3 localScale = transform.localScale;
-        localScale.x *= -1;
-        transform.localScale = localScale;
+        if (_direction.x < 0)
+        {
+            Vector3 localScale = transform.localScale;
+            localScale.x *= 1;
+            transform.localScale = localScale;
+        }
+        else if (_direction.x > 0)
+        {
+            Vector3 localScale = transform.localScale;
+            localScale.x *= -1;
+            transform.localScale = localScale;
+        }
     }
 }

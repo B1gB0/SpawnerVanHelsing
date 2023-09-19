@@ -1,10 +1,9 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Spawner : ObjectPool
 {
-    [SerializeField] private GameObject _enemyPrefab;
+    [SerializeField] private Enemy _enemy;
     [SerializeField] private Transform[] _spawnPoints;
     [SerializeField] private float _speed;
     [SerializeField] private float _delay;
@@ -13,7 +12,7 @@ public class Spawner : ObjectPool
 
     private void Start()
     {
-        Initialize(_enemyPrefab);
+        Initialize(_enemy.gameObject);
         StartCoroutine(SpawnEnemy());
     }
 
@@ -22,7 +21,6 @@ public class Spawner : ObjectPool
         enemy.SetActive(true);
         enemy.transform.position = spawnPoint;
     }
-
 
     private Vector3 GetRandomDirection()
     {
