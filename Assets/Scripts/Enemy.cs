@@ -1,18 +1,46 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Animator))]
 public class Enemy : MonoBehaviour
 {
-    private void OnTriggerEnter2D(Collider2D collision)
+    [SerializeField] private float _speed;
+
+    public readonly int Run = Animator.StringToHash(nameof(Run));
+
+    private Animator _animator;
+    private Vector3 _direction;
+
+    private void Start()
     {
-        if (collision.CompareTag("Border"))
-            Die();
+        _animator = GetComponent<Animator>();
     }
 
-    private void Die()
+    private void Update()
     {
-        EnemyMovement enemyMovement = gameObject.GetComponent<EnemyMovement>();
-        enemyMovement.Flip();
+        _animator.Play(Run);
+        transform.Translate(_direction * _speed * Time.deltaTime);
+    }
 
-        gameObject.SetActive(false);
+    public void SetDirection(Vector3 direction)
+    {
+        _direction = direction;
+
+        Flip();
+    }
+
+    public void Flip()
+    {
+        if (_direction.x < 0)
+        {
+            Vector3 localScale = transform.localScale;
+            localScale.x *= 1;
+            transform.localScale = localScale;
+        }
+        else if (_direction.x > 0)
+        {
+            Vector3 localScale = transform.localScale;
+            localScale.x *= -1;
+            transform.localScale = localScale;
+        }
     }
 }

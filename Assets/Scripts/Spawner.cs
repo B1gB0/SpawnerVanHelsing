@@ -50,8 +50,8 @@ public class Spawner : ObjectPool
 
                 SetEnemy(enemyPrefab, _spawnPoints[spawnPointNumber].position);
 
-                EnemyMovement enemyMovement = enemyPrefab.GetComponent<EnemyMovement>();
-                enemyMovement.SetDirection(GetRandomDirection());
+                Enemy enemy = enemyPrefab.GetComponent<Enemy>();
+                enemy.SetDirection(GetRandomDirection());
 
                 yield return waitForSeconds;
             }
